@@ -3,11 +3,10 @@ import { program } from "commander";
 import chalk from "chalk";
 
 import * as http from "./lib/http-client.js";
-import { version } from "../package.json";
 
 const main = async () => {
   program
-    .version(version, "-v, --version")
+    .version("0.1.0", "-v, --version")
     .description("A simple HTTP client that displays human-readable content")
     .option("-u, --url <url>", "URL to fetch and display content")
     .option(
@@ -26,6 +25,11 @@ const main = async () => {
   if (options.url) {
     try {
       const response = await http.get(options.url);
+      if (response.headers["content-type"]?.includes("application/json")) {
+        console.log(chalk.yellow("JSON response:"));
+        console.log(JSON.parse(response.body));
+        return;
+      }
       console.log(chalk.green(parseHtml(response.body)));
     } catch (error) {
       console.error(chalk.red("Error fetching URL:", error));

@@ -1,5 +1,5 @@
-import * as net from "node:net";
-import * as tls from "node:tls";
+import net from "node:net";
+import tls from "node:tls";
 import fs from "fs/promises";
 
 export type HttpResponse = {
@@ -45,7 +45,7 @@ export const getJson = async <T>(url: string) => {
   const { body, headers } = await get(url);
   const contentType = headers["content-type"];
 
-  if (contentType !== "application/json") {
+  if (!contentType.includes("application/json")) {
     return null; // Not JSON data
   }
 
