@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc -w",
+    "build:watch": "pnpm build -w",
     "start": "node ./dist/index.js",
     "publish": "pnpm publish --access public"
   },
