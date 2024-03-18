@@ -1,7 +1,7 @@
 {
   "name": "@prenaissance/go2web",
   "bin": {
-    "go2web": "./dist/index.js"
+    "go2web": "dist/index.js"
   },
   "version": "0.1.1",
   "description": "CLI http client",
@@ -12,7 +12,8 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w",
-    "start": "node ./dist/index.js"
+    "start": "node ./dist/index.js",
+    "publish": "pnpm publish --access public"
   },
   "keywords": [],
   "author": "",
