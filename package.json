@@ -6,6 +6,9 @@
   "version": "0.1.0",
   "description": "CLI http client",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc -w",

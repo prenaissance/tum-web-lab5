@@ -1,11 +1,13 @@
-import * as http from "./lib/http-client.js";
-import * as cheerio from "cheerio"; // Assuming cheerio is installed using npm or yarn
+import * as cheerio from "cheerio";
 import { program } from "commander";
-import chalk from "chalk"; // Assuming chalk is installed using npm or yarn
+import chalk from "chalk";
+
+import * as http from "./lib/http-client.js";
+import { version } from "../package.json";
 
 const main = async () => {
   program
-    .version("0.1.0")
+    .version(version, "-v, --version")
     .description("A simple HTTP client that displays human-readable content")
     .option("-u, --url <url>", "URL to fetch and display content")
     .option(
@@ -24,7 +26,7 @@ const main = async () => {
   if (options.url) {
     try {
       const response = await http.get(options.url);
-      console.log(chalk.green(parseHtml(response)));
+      console.log(chalk.green(parseHtml(response.body)));
     } catch (error) {
       console.error(chalk.red("Error fetching URL:", error));
     }
@@ -32,7 +34,7 @@ const main = async () => {
     const searchUrl = getSearchEngineUrl(options.search); // Replace with your preferred search engine logic
     try {
       const response = await http.get(searchUrl);
-      const topResults = parseSearchResults(response);
+      const topResults = parseSearchResults(response.body);
       console.log(chalk.bold.cyan("Top 10 results:"));
       topResults.forEach((result, index) =>
         console.log(`${index + 1}. ${result}`)
@@ -45,17 +47,29 @@ const main = async () => {
 
 function parseHtml(html: string): string {
   const $ = cheerio.load(html);
-  const text = $.text().trim(); // Remove leading/trailing whitespace
+  const text = $("h1, h2, h3, h4, h5, h6, p")
+    .toArray()
+    .map((header) => {
+      const textContent = $(header).text();
+      if (header.tagName === "h1")
+        return chalk.bold.white.underline(textContent);
+      if (header.tagName === "h2") return chalk.bold.white(textContent);
+      if (header.tagName === "h3") return chalk.bold.yellow(textContent);
+      if (header.tagName === "h4") return chalk.bold.green(textContent);
+      if (header.tagName === "h5") return chalk.bold.blue(textContent);
+      if (header.tagName === "h6") return chalk.bold.magenta(textContent);
+      return textContent;
+    })
+    .filter((text) => text.trim().length > 0)
+    .join("\n");
   return text;
 }
 
-// Replace this with your preferred logic to construct a search URL based on the search term
-function getSearchEngineUrl(searchTerm: string): string {
-  // Example: Google search
+const getSearchEngineUrl = (searchTerm: string) => {
   return `https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`;
-}
+};
 
-function parseSearchResults(html: string): string[] {
+const parseSearchResults = (html: string) => {
   const $ = cheerio.load(html);
   const headers = $("a > h3");
   const anchors = headers.parent();
@@ -68,6 +82,6 @@ function parseSearchResults(html: string): string[] {
     )
     .get();
   return results.slice(0, 10); // Get top 10 results
-}
+};
 
 main();
